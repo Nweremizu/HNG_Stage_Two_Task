@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+   extensions        = [hstore(schema: "myHstoreSchema"), pg_trgm, postgis(version: "2.1")]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model User {
+  userId           String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstName        String             @default("") @db.VarChar
+  lastName         String             @default("") @db.VarChar
+  email            String             @unique @default("") @db.VarChar
+  password         String             @db.VarChar
+  phone            String?            @db.VarChar
+  organizations    Organization[]     @relation("UserOrganization")
+  UserOrganization UserOrganization[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Organization {
+  orgId            String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String             @db.VarChar
+  description      String?            @db.VarChar
+  users            User[]             @relation("UserOrganization")
+  UserOrganization UserOrganization[]
+}
+
+model UserOrganization {
+  userId String @db.Uuid
+  orgId  String @db.Uuid
+
+  user         User         @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  organization Organization @relation(fields: [orgId], references: [orgId], onDelete: Cascade)
+
+  @@id([userId, orgId])
+}
