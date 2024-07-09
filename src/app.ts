@@ -8,12 +8,26 @@ const app = express();
 app.use(express.json());
 
 app.get("/", (req: Request, res: Response) => {
+  // send a html response with styling and it should be centered in the middle of the page
   res.send(`
-        <div style="height: 100vh; display: flex; justify-content: center; align-items: center; flex-direction: column;">
-            <div style="text-align: center; margin-top: 20px;">
-                <h1>Welcome to the API</h1>
-            </div>
-        </div>
+    <html>
+    <head>
+    <style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    h1 {
+        font-size: 3rem;
+    }
+    </style>
+    </head>
+    <body>
+    <h1>Welcome to the API</h1>
+    </body>
+    </html>
     `);
 });
 
