@@ -12,7 +12,7 @@ app.use(express_1.default.json());
 app.get("/", (req, res) => {
     res.send(`
         <div style="height: 100vh; display: flex; justify-content: center; align-items: center; flex-direction: column;">
-            <div style="text-align: center; margin-top: 20px;>
+            <div style="text-align: center; margin-top: 20px;">
                 <h1>Welcome to the API</h1>
             </div>
         </div>
