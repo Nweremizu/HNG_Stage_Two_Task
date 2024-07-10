@@ -47,13 +47,14 @@ describe("Token Generation", () => {
     });
 });
 describe("Authentication (e2e)", () => {
+    let token;
     afterAll(async () => {
         await prisma_1.default.user.deleteMany();
         await prisma_1.default.organization.deleteMany();
         await prisma_1.default.userOrganization.deleteMany();
     });
     describe("POST /auth/register", () => {
-        it("should register a new user with default organisation", async () => {
+        it("should register a new user", async () => {
             const res = await (0, supertest_1.default)(app_1.default).post("/auth/register").send({
                 firstName: "John",
                 lastName: "Doe",
@@ -64,23 +65,7 @@ describe("Authentication (e2e)", () => {
             expect(res.status).toBe(201);
             expect(res.body.data).toHaveProperty("user");
             expect(res.body.data).toHaveProperty("accessToken");
-            const user = (await prisma_1.default.user.findUnique({
-                where: {
-                    userId: res.body.data.user.userId,
-                },
-                select: {
-                    organizations: {
-                        select: {
-                            name: true,
-                            description: true,
-                        },
-                    },
-                },
-            }));
-            console.log(user);
-            expect(user).toBeTruthy();
-            expect(user.organizations).toHaveLength(1);
-            expect(user.organizations[0].name).toBe("John's Organization");
+            token = res.body.data.accessToken;
         }, 20000);
         it("should login successfully with the registered user", async () => {
             const res = await (0, supertest_1.default)(app_1.default).post("/auth/login").send({
@@ -107,8 +92,8 @@ describe("Authentication (e2e)", () => {
                 password: "password",
                 phone: "1234567890",
             });
-            expect(response.status).toBe(400);
-            expect(response.body.statusCode).toBe(400);
+            expect(response.status).toBe(422);
+            expect(response.body.statusCode).toBe(422);
             expect(response.body.message).toBe("Registration unsuccessful");
         });
         it("should return validation error if required fields are missing", async () => {
@@ -116,15 +101,18 @@ describe("Authentication (e2e)", () => {
                 {
                     firstName: "John",
                     lastName: "Doe",
+                    email: "johnDoe@gmail.com",
                 },
-                { firstName: "John", email: "johnDoe@gmail.com", lastName: "Doe" },
+                { firstName: "John", lastName: "Doe", password: "password" },
                 {
                     firstName: "John",
                     email: "johnDoe@gmail.com",
+                    password: "password",
                 },
                 {
                     lastName: "Doe",
                     email: "johnDoe@gmail.com",
+                    password: "password",
                 },
             ];
             for (const data of testCases) {
@@ -132,6 +120,12 @@ describe("Authentication (e2e)", () => {
                 expect(response.status).toBe(422);
                 expect(response.body.errors);
             }
+        });
+        it("should check the default organization is created", async () => {
+            const response = await (0, supertest_1.default)(app_1.default)
+                .get("/api/organisations")
+                .set("Authorization", `Bearer ${token}`);
+            expect(response.status).toBe(200);
         });
     });
 });

@@ -16,10 +16,10 @@ const register = async (req, res) => {
         },
     });
     if (existingUser) {
-        return res.status(400).json({
+        return res.status(422).json({
             status: "Bad request",
             message: "Registration unsuccessful",
-            statusCode: 400,
+            statusCode: 422,
         });
     }
     try {
@@ -79,7 +79,7 @@ const login = async (req, res) => {
     }
     const isValidPassword = await bcryptjs_1.default.compare(password, user.password);
     if (!isValidPassword) {
-        return res.status(400).json({
+        return res.status(401).json({
             status: "Bad request",
             message: "Authentication failed",
             statusCode: 401,

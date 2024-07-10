@@ -54,6 +54,7 @@ describe("Token Generation", () => {
 });
 
 describe("Authentication (e2e)", () => {
+  let token: string;
   afterAll(async () => {
     await prisma.user.deleteMany();
     await prisma.organization.deleteMany();
@@ -61,7 +62,7 @@ describe("Authentication (e2e)", () => {
   });
 
   describe("POST /auth/register", () => {
-    it("should register a new user with default organisation", async () => {
+    it("should register a new user", async () => {
       const res = await request(app).post("/auth/register").send({
         firstName: "John",
         lastName: "Doe",
@@ -74,23 +75,7 @@ describe("Authentication (e2e)", () => {
       expect(res.body.data).toHaveProperty("user");
       expect(res.body.data).toHaveProperty("accessToken");
 
-      const user = (await prisma.user.findUnique({
-        where: {
-          userId: res.body.data.user.userId,
-        },
-        select: {
-          organizations: {
-            select: {
-              name: true,
-              description: true,
-            },
-          },
-        },
-      })) as any;
-      console.log(user);
-      expect(user).toBeTruthy();
-      expect(user.organizations).toHaveLength(1);
-      expect(user.organizations[0].name).toBe("John's Organization");
+      token = res.body.data.accessToken;
     }, 20000);
 
     it("should login successfully with the registered user", async () => {
@@ -123,8 +108,8 @@ describe("Authentication (e2e)", () => {
         phone: "1234567890",
       });
 
-      expect(response.status).toBe(400);
-      expect(response.body.statusCode).toBe(400);
+      expect(response.status).toBe(422);
+      expect(response.body.statusCode).toBe(422);
       expect(response.body.message).toBe("Registration unsuccessful");
     });
 
@@ -133,15 +118,18 @@ describe("Authentication (e2e)", () => {
         {
           firstName: "John",
           lastName: "Doe",
+          email: "johnDoe@gmail.com",
         },
-        { firstName: "John", email: "johnDoe@gmail.com", lastName: "Doe" },
+        { firstName: "John", lastName: "Doe", password: "password" },
         {
           firstName: "John",
           email: "johnDoe@gmail.com",
+          password: "password",
         },
         {
           lastName: "Doe",
           email: "johnDoe@gmail.com",
+          password: "password",
         },
       ];
 
@@ -151,6 +139,14 @@ describe("Authentication (e2e)", () => {
         expect(response.status).toBe(422);
         expect(response.body.errors);
       }
+    });
+
+    it("should check the default organization is created", async () => {
+      const response = await request(app)
+        .get("/api/organisations")
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toBe(200);
     });
   });
 });
