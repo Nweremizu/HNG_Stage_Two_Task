@@ -4,7 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --watchAll  --detectOpenHandles",
-    "dev": "nodemon server.ts"
+    "dev": "nodemon src/server.ts",
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
   },
    
   "keywords": [],
