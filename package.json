@@ -4,14 +4,10 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --watchAll  --detectOpenHandles",
-    "dev": "nodemon server.ts"
+    "dev": "nodemon server.ts",
     
   },
-   "pre-commit": [
-      "ts.check",
-      "build",
-      "add-build"
-  ],
+   
   "keywords": [],
   "author": "",
   "license": "ISC",
