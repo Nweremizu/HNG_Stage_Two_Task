@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --watchAll  --detectOpenHandles",
-    "dev": "nodemon server.ts"
+    "dev": "nodemon server.ts",
+    "build": "prisma generate"
   },
    
   "keywords": [],
