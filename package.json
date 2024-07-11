@@ -6,7 +6,7 @@
     "test": "jest --watchAll  --detectOpenHandles",
     "dev": "nodemon src/server.ts",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build"
   },
    
   "keywords": [],
